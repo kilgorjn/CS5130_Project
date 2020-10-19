@@ -5,6 +5,7 @@ const num_vertices = 50
 const max_x=400
 const max_y=400
 const v_diameter = 10
+frame_rate = 5
 
 let V = [];
 let E = [];
@@ -12,6 +13,34 @@ let D = []; //disjoint sets
 let A = []; // mst edges
 let searched_edges = []
 let current_frame = 0
+
+
+class Vertex {
+    constructor(id, x, y) {
+      this.id = id
+      this.x = x;
+      this.y = y;
+    }
+  }
+  
+  class Edge {
+      constructor(v1, v2){
+          this.v1 = v1
+          this.v2 = v2
+          this.length = dist(v1.x,v1.y,v2.x,v2.y)
+      }
+  
+  }
+
+
+function reset(){
+    V = []
+    E = []
+    D = []
+    A = []
+    searched_edges = []
+    current_frame = 0
+}
 
 function create_vertices(){
     for(let n=0; n<num_vertices; n++){
@@ -38,13 +67,12 @@ function create_vertices(){
           new Vertex(
             n,
             r_x, 
-            r_y          );
+            r_y          
+            );
       }
       for(let n=0; n<num_vertices; n++){
           v = V[n];
-        console.log(`${n} ${v.x} ${v.y}`)
       }  
-      console.log(V);    
 }
 
 function create_edges(){
@@ -68,12 +96,13 @@ function create_edges(){
         }
     })
 
-
-
-
-
 }
 
+
+/**
+ * Disjoint Set methods
+ * (from pseudo code in CLRS book)
+ */
 
 function MAKE_SET(v){
     s = FIND_SET(v)
@@ -81,18 +110,13 @@ function MAKE_SET(v){
     if(FIND_SET(v) === undefined){
         D.push([{id:D.length,vertices:[v]}])
     }
-    console.log(`MAKE_SET:finished.  |D| = ${D.length}`)
 }
 
 function UNION(x,y){
-    console.log(`UNION: called with x=${x}, y=${y}`)
     set1_index = FIND_SET(x)
     set2_index = FIND_SET(y)
     set1 = D[set1_index]
     set2 = D[set2_index]
-    console.log(`   UNION: set1 = ${set1}, set2 = ${set2}`)
-    console.log(`   UNION: set2.vertices = ${set2.vertices}`)
-    console.debug(set2)
     for(let i =0; i<set2.length; i++){
         set1.push(set2[i])
     }
@@ -100,9 +124,7 @@ function UNION(x,y){
 
 }
 
-// FIND-SET(x) returns a pointer to the representative of the (unique) set containing x.
 function FIND_SET(v){
-    console.log(`FIND_SET: called  v.id = ${v.id}`)
     for(let i = 0; i<D.length;i++){
         s = D[i]
         for(let j=0; j<s.length;j++){
@@ -114,6 +136,16 @@ function FIND_SET(v){
     return undefined
 }
 
+
+
+
+/**
+ * Minimal Spanning Tree method (KRUSKAL alg)
+ * from pseudo-code in CLRS book
+ * 
+ * with additional array 'searched_edges' which is used
+ * to display the results
+ */
 
 function MST_KRUSKAL(){
     for(let n=0; n<V.length; n++){
@@ -129,26 +161,37 @@ function MST_KRUSKAL(){
         fs_v = FIND_SET(v)
         if(fs_u != fs_v){
             A.push(edge)
+            searched_edges.push({edge:edge,type:'found'})
             UNION(u,v)
+        }else{
+            searched_edges.push({edge:edge,type:'searched'})
         }
     }
     
 }
 
-function setup() {
-    // randomSeed(99);
-    background(220);
-    frameRate(1)
 
-    createCanvas(max_x, max_y);
-    create_vertices()
-   
-    create_edges()
-    MST_KRUSKAL()
-   
+
+
+
+
+/**
+ * functions for drawing edges and vertices on the screen
+ */
+function truncate_searched_edges(){
+    //search for the last found edge
+    let last_found_searched_edge = 0
+
+    for(n=0; n<searched_edges.length; n++){
+        if(searched_edges[n].type == 'found'){
+            last_found_searched_edge = n
+        }
+    }
+    searched_edges.splice(last_found_searched_edge,searched_edges.length-last_found_searched_edge)
 }
 
 function draw_vertices(){
+    stroke('gray')
     for(let n=0; n<num_vertices; n++){
         v = V[n];
         circle(v.x, v.y, v_diameter);
@@ -163,29 +206,69 @@ function draw_edges(current_frame){
     } 
 }
 
-function draw() {
-  background(220);
-  draw_vertices();
-  draw_edges(current_frame);
-  current_frame++;
+function draw_searched_edges(current_frame){
+    m = min(current_frame,searched_edges.length)
+    for(let n=0; n<m; n++){
+        searched_edge = searched_edges[n]
+        edge = searched_edge.edge
+        if(searched_edge.type == 'searched'){
+            if(n == m-1){
+                stroke('black')
+                strokeWeight(4)           
+                line(edge.v1.x, edge.v1.y, edge.v2.x, edge.v2.y);
+                strokeWeight(1)
+            }
+        }else{
+            stroke('red')
+            line(edge.v1.x, edge.v1.y, edge.v2.x, edge.v2.y);
+        }
+
+    } 
 }
 
-class Vertex {
-  constructor(id, x, y) {
-    this.id = id
-    this.x = x;
-    this.y = y;
-  }
-}
-
-class Edge {
-    constructor(v1, v2){
-        this.v1 = v1
-        this.v2 = v2
-        this.length = dist(v1.x,v1.y,v2.x,v2.y)
+function draw_found_edges(){
+    for(let n=0; n<A.length; n++){
+        edge = A[n]
+        stroke('red')
+        line(edge.v1.x, edge.v1.y, edge.v2.x, edge.v2.y);
     }
 
 }
+
+/**
+ * P5 setup and draw methods
+ */
+
+function setup() {
+    // randomSeed(99);
+    background(220);
+    frameRate(frame_rate)
+
+    createCanvas(max_x, max_y);
+    create_vertices()
+    background(220);
+    draw_vertices();    
+    create_edges()
+    MST_KRUSKAL()
+    truncate_searched_edges()
+    noLoop()
+   
+}
+
+
+function draw() {
+  background(220);
+  draw_vertices();
+  if(current_frame < searched_edges.length){
+    draw_searched_edges(current_frame);
+  }else{
+    draw_found_edges();
+  }
+  
+  current_frame++;
+}
+
+
 
 
 
