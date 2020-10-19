@@ -235,6 +235,13 @@ function draw_found_edges(){
 
 }
 
+
+function start_loop(button){
+    
+    loop()
+    button.attribute('disabled', '');
+}
+
 /**
  * P5 setup and draw methods
  */
@@ -243,7 +250,15 @@ function setup() {
     // randomSeed(99);
     background(220);
     frameRate(frame_rate)
-
+    button = createButton('Start');
+    button.position(19, max_y+40);
+    button.mousePressed(function(){
+        loop()
+        this.attribute('disabled','')
+    });
+    // rSlider = createSlider(0, 50, 10);
+    // rSlider.position(20, 20);
+    // text('red', rSlider.x * 2 + rSlider.width, 35);
     createCanvas(max_x, max_y);
     create_vertices()
     background(220);
