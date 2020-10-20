@@ -215,6 +215,7 @@ function draw_searched_edges(current_frame){
             }
         }else{
             stroke('red')
+            strokeWeight(3)
             line(edge.v1.x, edge.v1.y, edge.v2.x, edge.v2.y);
         }
 
@@ -225,11 +226,18 @@ function draw_found_edges(){
     for(let n=0; n<A.length; n++){
         edge = A[n]
         stroke('red')
+        strokeWeight(3)
         line(edge.v1.x, edge.v1.y, edge.v2.x, edge.v2.y);
     }
 
 }
 
+function draw_density(){
+    strokeWeight(1)
+    for(var i=0; i<E.length; i++){
+        line(E[i].v1.x,E[i].v1.y,E[i].v2.x,E[i].v2.y)
+    }
+}
 
 function start_loop(button){
     
@@ -283,16 +291,28 @@ function setup() {
 }
 
 
+
+var show_density = true
+
+
 function draw() {
-  background(220);
-  draw_vertices();
-  if(current_frame < searched_edges.length){
-    draw_searched_edges(current_frame);
-  }else{
-    draw_found_edges();
-  }
-  
-  current_frame++;
+    background(220);
+    stroke('gray')
+    strokeWeight(1)
+    if(current_frame < searched_edges.length){
+        draw_density()  
+    }    
+    
+
+    draw_vertices();
+
+    if(current_frame < searched_edges.length){
+        draw_searched_edges(current_frame);
+    }else{
+        draw_found_edges();
+    }
+    
+    current_frame++;
 }
 
 
