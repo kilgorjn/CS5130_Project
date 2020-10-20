@@ -13,7 +13,31 @@ let found_vertices = []
 let frame_rate = 5
 let current_frame = 0
 
+V.findChildren = function(v){ 
+    children = []
+    
+    // console.log(`*******findChildren called for parent.id = ${v.id}`)
 
+    for(_i in this){
+        // console.log(`      ******findChildren: child.id = ${this[_i].id}`)
+    
+        if(typeof this[_i] !== 'function'){
+            // console.log(`typeof this[_i] = ${typeof this[_i]}`)
+            // console.debug(this[_i])
+            if(this[_i].pi && this[_i].pi.id === v.id){
+                children.push(this[_i])
+            }
+        }
+    }
+    return children
+}
+V.findRoot = function(v){
+    for(_i in this){
+        if(this[_i].pi == null){
+            return(this[_i])
+        }
+    }
+}
 
 class Vertex {
     constructor(id, x, y) {
@@ -31,11 +55,6 @@ class Edge {
         this.v2 = v2
         this.length = dist(v1.x,v1.y,v2.x,v2.y)
     }
-
-    containsVertext(v){
-        return v.id === this.v1.id || v.id === this.v2.id
-    }
-
 }
 
 
@@ -48,10 +67,10 @@ function create_edges(){
         }
     }
 
-    for(i=0; i<E.length; i++){
-        e = E[i]
-        console.log(`edge ${i} connects vertext ${e.v1.id} with vertext ${e.v2.id} with length ${e.length}`)
-    }
+    // for(i=0; i<E.length; i++){
+    //     e = E[i]
+    //     console.log(`edge ${i} connects vertext ${e.v1.id} with vertext ${e.v2.id} with length ${e.length}`)
+    // }
 
 }
 
@@ -60,7 +79,7 @@ function draw_vertices(){
     for(let n=0; n<V.length; n++){
         v = V[n];
         circle(v.x, v.y, v_diameter);
-        text(v.id,v.x+5,v.y+5)
+        // text(v.id,v.x+5,v.y+5)
     }
 }
 
@@ -77,6 +96,7 @@ function createQ(){
         }
         return false;
     }
+
     for(i=0; i<V.length; i++){
         v = V[i]
         // Q.push(new Vertex(v.id, v.x, v.y))
@@ -94,10 +114,10 @@ function createQ(){
             return 1
         }
     })
-    console.log("----------createQ   printing Q")
-    for(i=0; i<Q.length; i++){
-        console.log(Q[i])
-    }
+    // console.log("----------createQ   printing Q")
+    // for(i=0; i<Q.length; i++){
+    //     console.log(Q[i])
+    // }
     return Q
 
 }
@@ -116,9 +136,9 @@ function EXTRACT_MIN(Q){
         }
     })
     v = Q.shift()
-    console.debug(JSON.stringify(Q))
-    console.debug(v)
-    console.log(`EXTRACT_MIN: returning v.id=${v.id} and key = ${v.key}`)    
+    // console.debug(JSON.stringify(Q))
+    // console.debug(v)
+    // console.log(`EXTRACT_MIN: returning v.id=${v.id} and key = ${v.key}`)    
     return(v)
 
 }
@@ -149,14 +169,15 @@ function MST_PRIM(){
     r.key = 0
     r.pi = null
     Q = createQ()
-    console.debug("Q=")
-    console.debug(Q)
+    // console.debug("Q=")
+    // console.debug(Q)
 
 
     while(Q.length>0){
         // console.debug(`*************Q len = ${Q.length}`)
         u = EXTRACT_MIN(Q)
-        found_vertices.push(u)
+        // found_vertices.push(v)
+
         // console.log(`MST_PRIM inpecting vertex ${u.id} with key ${u.key}`)
         adj_vertices = G_adj(u)
         // console.log(`MST_PRIM adjacent verticies of ${u.id} are:`)
@@ -170,12 +191,35 @@ function MST_PRIM(){
             if(vInQ && w < v.key){
                 v.pi=u
                 v.key = w
+
             }
 
         }
     }
 
 }
+
+
+function add_to_animation_list(vertex_parent,lvl){
+    // console.log(`${" ".repeat(lvl)} finding children for parent ${vertex_parent.id}`)
+    found_vertices.push(vertex_parent)
+    var children = V.findChildren(vertex_parent)
+    var i
+    for(i=0; i<children.length;i++){
+        // console.log(`${" ".repeat(lvl)} found ${children.length} children.  i = ${i}`)
+        add_to_animation_list(children[i],lvl+1)
+        // console.log(`${" ".repeat(lvl)} returned from add_to_animation_list  i = ${i}`)
+    }
+    // console.log(`${" ".repeat(lvl)} exited loop; children.len = ${children.length}`)
+}
+
+function create_animation_list(){
+    //find the root of the list
+    root = V.findRoot()
+    add_to_animation_list(root,0)   
+
+}
+
 
 
 function setup() {
@@ -196,7 +240,7 @@ function setup() {
 
     if(params.vertices !== undefined){
         vertices = JSON.parse(decodeURIComponent(params.vertices))
-        V = []
+        // V = []
         for(i=0; i<vertices.length; i++){
             v = vertices[i]
             V.push(new Vertex(v.id,v.x,v.y))
@@ -210,15 +254,15 @@ function setup() {
         // create_vertices()
         create_edges()
         MST_PRIM()
-        console.log('Prim is finished')
-        console.log('V.length = ',V.length)
-        for(i=0; i<V.length; i++){
-            console.log(V[i])
-        }
+        // console.log('Prim is finished')
+        create_animation_list()
+        // console.log(`found_verticies len = ${found_vertices.length}`)
+        // console.debug(found_vertices)
+
     }
     // noLoop()
-    console.log("----------------------draw_MST")
-    console.debug(V)
+    // console.log("----------------------draw_MST")
+    // console.debug(V)
 
 }
 
@@ -236,7 +280,8 @@ function draw_MST(){
         v = V[i]
         if(v.pi !== null){
             u=v.pi
-            // console.log(`draw_MST:  v=${v} v.pi = ${v.pi}`)
+            // console.log(`draw_MST:  v=${v.id} v.pi = ${v.pi.id}`)
+            stroke('red')
             line(u.x,u.y,v.x,v.y)
         }
     }
@@ -247,13 +292,21 @@ function draw_MST(){
 function draw() {
     background(220);
     draw_vertices()
-    // m = min(current_frame,found_vertices.length)
-    // for(i=0; i<m;i++){
-    //     v = found_vertices[i]
-    //     u = found_vertices[i+1]
-    //     line(v.x,v.y,u.x,u.y)
-    // }
-    // current_frame++
-    draw_MST()
+    m = min(current_frame,found_vertices.length)
+    // finished = m>found_vertices.length
+    stroke('red')
+    for(i=1; i<m;i++){
+        v = found_vertices[i]
+        u = v.pi
+        if(i==m-1 && m<found_vertices.length){
+            strokeWeight(4)           
+            stroke('black')
+        }
+        line(v.x,v.y,u.x,u.y)
+        strokeWeight(1)
+
+    }
+    current_frame++
+    // draw_MST()
     // draw_edges()
 }
