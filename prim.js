@@ -9,6 +9,10 @@ let v_diameter = 10
 
 let V = [];
 let E = [];
+let found_vertices = []
+let frame_rate = 5
+let current_frame = 0
+
 
 
 class Vertex {
@@ -16,7 +20,7 @@ class Vertex {
       this.id = id
       this.x = x;
       this.y = y;
-      this.pi = null
+      this.pi = undefined
       this.key = Infinity
     }
 }
@@ -26,6 +30,10 @@ class Edge {
         this.v1 = v1
         this.v2 = v2
         this.length = dist(v1.x,v1.y,v2.x,v2.y)
+    }
+
+    containsVertext(v){
+        return v.id === this.v1.id || v.id === this.v2.id
     }
 
 }
@@ -42,7 +50,7 @@ function create_edges(){
 
     for(i=0; i<E.length; i++){
         e = E[i]
-        console.log(`edge ${i} connects vertext ${e.v1.id} with vertext ${e.v2.id}`)
+        console.log(`edge ${i} connects vertext ${e.v1.id} with vertext ${e.v2.id} with length ${e.length}`)
     }
 
 }
@@ -60,37 +68,58 @@ function draw_vertices(){
 
 function createQ(){
     Q = []
-    for(i=0; i<V.length; i++){
-        v = V[i]
-        Q.push(new Vertex(v.id, v.x, v.y))
-    }
-
-    for(i=0; i<Q.length; i++){
-        v = Q[i]
-        for(j=0; j<E.length; j++){
-            // console.log(`i = ${i} j = ${j} v.id = ${v.id} k.key = ${v.key} E${j} = ${E[j]} E${j}.v1.id = ${E[j].v1.id}  E${j}.length = ${E[j].length} `)
-            if(E[j].v1.id === v.id && E[j].length < v.key){
-                // console.log('setting key')
-                v.key = E[i].length
+    Q.containsVertex = function(v){ 
+        
+        for(_i in this){
+            if(this[_i].id === v.id){
+                return true
             }
         }
+        return false;
+    }
+    for(i=0; i<V.length; i++){
+        v = V[i]
+        // Q.push(new Vertex(v.id, v.x, v.y))
+        Q.push(v)
+    }
+
+    Q.sort(function(a,b){
+        if(a.key == b.key){
+            return 0
+        }
+        if(a.key < b.key){
+            return -1
+        }
+        if(a.key > b.key){
+            return 1
+        }
+    })
+    console.log("----------createQ   printing Q")
+    for(i=0; i<Q.length; i++){
+        console.log(Q[i])
     }
     return Q
 
 }
 
 function EXTRACT_MIN(Q){
-    //find the vector in Q with the min key, remove and return
-    min_key = Infinity
-    min_idx = -1
-    for(i=0; i<Q; i++){
-        if(Q.key < min_key){
-            min_key = Q.key
-            min_idx = i
-        }
-    }
 
-    return Q.splice(min_idx,1)[0]
+    Q.sort(function(a,b){
+        if(a.key == b.key){
+            return 0
+        }
+        if(a.key < b.key){
+            return -1
+        }
+        if(a.key > b.key){
+            return 1
+        }
+    })
+    v = Q.shift()
+    console.debug(JSON.stringify(Q))
+    console.debug(v)
+    console.log(`EXTRACT_MIN: returning v.id=${v.id} and key = ${v.key}`)    
+    return(v)
 
 }
 
@@ -118,29 +147,31 @@ function weight(u,v){
 function MST_PRIM(){
     r = V[0]
     r.key = 0
+    r.pi = null
     Q = createQ()
     console.debug("Q=")
     console.debug(Q)
 
 
     while(Q.length>0){
+        // console.debug(`*************Q len = ${Q.length}`)
         u = EXTRACT_MIN(Q)
-        console.log(`MST_PRIM inpecting vertex ${u.id}`)
+        found_vertices.push(u)
+        // console.log(`MST_PRIM inpecting vertex ${u.id} with key ${u.key}`)
         adj_vertices = G_adj(u)
+        // console.log(`MST_PRIM adjacent verticies of ${u.id} are:`)
+        // console.debug(adj_vertices)
+
         for(i=0; i<adj_vertices.length; i++){
+            // console.log(`  looping  i=${i} adj_vertices.length = ${adj_vertices.length}`)
             v = adj_vertices[i]
-            vInQ = false
-            for(j=0; j<Q.length; j++){
-                if(v.id === Q[j].id){
-                    vInQ=true;
-                    break;
-                }
-            }
-            w=weight(u,v)            
+            vInQ = Q.containsVertex(v)
+            w=weight(u,v)  
             if(vInQ && w < v.key){
                 v.pi=u
                 v.key = w
             }
+
         }
     }
 
@@ -174,7 +205,7 @@ function setup() {
 
     createCanvas(max_x, max_y);
     background(220);
-
+    frameRate(frame_rate)
     if(V.length > 0){
         // create_vertices()
         create_edges()
@@ -216,6 +247,13 @@ function draw_MST(){
 function draw() {
     background(220);
     draw_vertices()
+    // m = min(current_frame,found_vertices.length)
+    // for(i=0; i<m;i++){
+    //     v = found_vertices[i]
+    //     u = found_vertices[i+1]
+    //     line(v.x,v.y,u.x,u.y)
+    // }
+    // current_frame++
     draw_MST()
     // draw_edges()
 }
