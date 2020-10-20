@@ -1,0 +1,25 @@
+{
+  "name": "cs5130_project",
+  "version": "1.0.0",
+  "description": "stuffs",
+  "main": "index.html",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "test",
+    "start":"./node_modules/.bin/http-server -a localhost -p 8000 -c-1"
+
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kilgorjn/CS5130_Project.git"
+  },
+  "author": "Jeff Kilgore",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kilgorjn/CS5130_Project/issues"
+  },
+  "homepage": "https://github.com/kilgorjn/CS5130_Project#readme"
+}
