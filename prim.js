@@ -1,3 +1,5 @@
+
+
 //CLRS page 634
 
 let max_x=400
@@ -29,39 +31,6 @@ class Edge {
 }
 
 
-function create_vertices(){
-    for(let n=0; n<num_vertices; n++){
-        overlapped = true
-        let comparisions = 0
-        while(overlapped == true){
-            r_x = int(random(v_diameter,max_x-v_diameter))
-            r_y = int(random(v_diameter,max_y-v_diameter))
-            comparisions +=1
-            overlapped = false
-            
-            for (p=0; p<V.length; p++){
-                d = dist(V[p].x,V[p].y, r_x,r_y)
-                if(d < v_diameter*2){
-                    overlapped=true
-                    break
-                }
-            }
-            if(comparisions >=50){
-                overlapped=false
-            }
-        }
-        V[n] =
-          new Vertex(
-            n,
-            r_x, 
-            r_y          
-            );
-      }
-      for(let n=0; n<num_vertices; n++){
-          v = V[n];
-      }  
-}
-
 function create_edges(){
     for(let i=0; i<V.length; i++){
         for(let j=i; j<V.length; j++){
@@ -70,18 +39,11 @@ function create_edges(){
             }
         }
     }
-    // //sort the edges by weight
-    // E.sort(function(e1,e2){
-    //     if(e1.length == e2.length){
-    //         return 0
-    //     }
-    //     if(e1.length < e2.length){
-    //         return -1
-    //     }
-    //     if(e1.length > e2.length){
-    //         return 1
-    //     }
-    // })
+
+    for(i=0; i<E.length; i++){
+        e = E[i]
+        console.log(`edge ${i} connects vertext ${e.v1.id} with vertext ${e.v2.id}`)
+    }
 
 }
 
@@ -90,8 +52,11 @@ function draw_vertices(){
     for(let n=0; n<V.length; n++){
         v = V[n];
         circle(v.x, v.y, v_diameter);
+        text(v.id,v.x+5,v.y+5)
     }
 }
+
+
 
 function createQ(){
     Q = []
@@ -103,9 +68,9 @@ function createQ(){
     for(i=0; i<Q.length; i++){
         v = Q[i]
         for(j=0; j<E.length; j++){
-            console.log(`i = ${i} j = ${j} v.id = ${v.id} k.key = ${v.key} E${j} = ${E[j]} E${j}.v1.id = ${E[j].v1.id}  E${j}.length = ${E[j].length} `)
+            // console.log(`i = ${i} j = ${j} v.id = ${v.id} k.key = ${v.key} E${j} = ${E[j]} E${j}.v1.id = ${E[j].v1.id}  E${j}.length = ${E[j].length} `)
             if(E[j].v1.id === v.id && E[j].length < v.key){
-                console.log('setting key')
+                // console.log('setting key')
                 v.key = E[i].length
             }
         }
@@ -115,22 +80,69 @@ function createQ(){
 }
 
 function EXTRACT_MIN(Q){
+    //find the vector in Q with the min key, remove and return
+    min_key = Infinity
+    min_idx = -1
+    for(i=0; i<Q; i++){
+        if(Q.key < min_key){
+            min_key = Q.key
+            min_idx = i
+        }
+    }
+
+    return Q.splice(min_idx,1)[0]
 
 }
 
-  
+/**
+ * find all vectors that are adjacent to v
+ * @param {} v 
+ */
+function G_adj(v){
+    retval = []
+    for(i=0; i<E.length; i++){
+        // console.log(`G_adj: i=${i} v.id = ${v.id} E[${i}].v1.id = ${E[i].v1.id}`)
+        if(E[i].v2.id === v.id){
+            retval.push(E[i].v1)
+        }else if(E[i].v1.id === v.id){
+            retval.push(E[i].v2)
+        }
+    }
+    return retval;
+}
+
+function weight(u,v){
+    return dist(u.x,u.y,v.x,v.y)
+}
+
 function MST_PRIM(){
-    // r = V[0]
-    // r.key = 0
-    // Q = createQ()
+    r = V[0]
+    r.key = 0
+    Q = createQ()
+    console.debug("Q=")
+    console.debug(Q)
 
-    // console.debug(V)
-    // console.debug(Q)
 
-
-    // while(Q.length>0){
-    //     u = EXTRACT_MIN(Q)
-    // }
+    while(Q.length>0){
+        u = EXTRACT_MIN(Q)
+        console.log(`MST_PRIM inpecting vertex ${u.id}`)
+        adj_vertices = G_adj(u)
+        for(i=0; i<adj_vertices.length; i++){
+            v = adj_vertices[i]
+            vInQ = false
+            for(j=0; j<Q.length; j++){
+                if(v.id === Q[j].id){
+                    vInQ=true;
+                    break;
+                }
+            }
+            w=weight(u,v)            
+            if(vInQ && w < v.key){
+                v.pi=u
+                v.key = w
+            }
+        }
+    }
 
 }
 
@@ -163,15 +175,47 @@ function setup() {
     createCanvas(max_x, max_y);
     background(220);
 
-    // create_vertices()
-    create_edges()
-    MST_PRIM()
+    if(V.length > 0){
+        // create_vertices()
+        create_edges()
+        MST_PRIM()
+        console.log('Prim is finished')
+        console.log('V.length = ',V.length)
+        for(i=0; i<V.length; i++){
+            console.log(V[i])
+        }
+    }
     // noLoop()
+    console.log("----------------------draw_MST")
+    console.debug(V)
 
 }
 
 
+function draw_edges(){
+    stroke('black')
+    for(i=0; i<E.length; i++){
+        
+        line(E[i].v1.x,E[i].v1.y,E[i].v2.x,E[i].v2.y)
+    }
+}
+
+function draw_MST(){
+    for(i=0; i<V.length; i++){
+        v = V[i]
+        if(v.pi !== null){
+            u=v.pi
+            // console.log(`draw_MST:  v=${v} v.pi = ${v.pi}`)
+            line(u.x,u.y,v.x,v.y)
+        }
+    }
+    
+
+}
+
 function draw() {
     background(220);
     draw_vertices()
+    draw_MST()
+    // draw_edges()
 }
