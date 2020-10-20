@@ -16,8 +16,13 @@
                 max_y = 400
                 V = create_vertices(num_vertices,v_diameter,max_x,max_y)
                 query_string = `max_x=${max_x}&max_y=${max_y}&v_diameter=${v_diameter}&vertices=${JSON.stringify(V)}`
+                
                 document.getElementById("kruskal").src = `kruskal.html?${query_string}`
+                document.getElementById("kruskal").style.display='inline-block'
+
                 document.getElementById("prim").src = `prim.html?${query_string}`
+                document.getElementById("prim").style.display='inline-block'
+
 
             }
         </script>
@@ -26,13 +31,15 @@
     </head>
     <body>
         <div>
-            <iframe id="kruskal" src="kruskal.html?num_vertices=100" width="450" height="500" frameBorder="0"></iframe>
-            <iframe id="prim" src="prim.html?num_vertices=100" width="450" height="500" frameBorder="0"></iframe>
+            <iframe id="kruskal" src="kruskal.html?num_vertices=100" width="450" height="500" frameBorder="0" style="display: none;"></iframe>
+            <iframe id="prim" src="prim.html?num_vertices=100" width="450" height="500" frameBorder="0" style="display: none;"></iframe>
         </div>
 
         <label>Number of Vertices</label>
-        <input id='txt_vertex_count' value="50" type="number"/>
+        <input id='txt_vertex_count' value="10" type="number"/>
         <button onclick='generateVertices()'>Go</button>
 
     </body>
+
+    
 </html>

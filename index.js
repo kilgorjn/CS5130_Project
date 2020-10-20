@@ -46,6 +46,7 @@ function create_vertices(num_vertices,v_diameter,max_x,max_y){
 }
 
 function setup() {
+    generateVertices();
     noLoop();
 }
 function draw(){
