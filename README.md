@@ -8,4 +8,4 @@ The runtime of Prim's algorithm is O(|V|<sup>2</sup>), while Kruskal's algorithm
 
 Prim's runs faster on dense graphs. Since these graphs are dense, Prim's <em>appears</em> to be a superior algorithm; however, that might not be the case if the graphs were more sparse.
 
-In the future, I may add an option to reduce the density.  (generating random graphs is an algorithm of it own :wink:)
+In the future, I may add an option to reduce the density.  (generating random graphs is an algorithm in itself :wink:)
