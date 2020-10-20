@@ -1,26 +1,38 @@
 <html>
     <head>
+        <title>MST</title>
         <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
         <script src="./index.js"></script>
+        <script>
+            max_vertices = 500
+            function generateVertices(){
+                num_vertices = parseInt(document.getElementById("txt_vertex_count").value)
+                if(num_vertices>max_vertices){
+                    alert(`That's alot of vertices!  Try something <= max_vertices`)
+                    return
+                }
+                v_diameter = 10
+                max_x = 400
+                max_y = 400
+                V = create_vertices(num_vertices,v_diameter,max_x,max_y)
+                query_string = `max_x=${max_x}&max_y=${max_y}&v_diameter=${v_diameter}&vertices=${JSON.stringify(V)}`
+                document.getElementById("kruskal").src = `kruskal.html?${query_string}`
+                document.getElementById("prim").src = `prim.html?${query_string}`
 
-        <!-- <style>
-            html, body {
-            height: 100%;
             }
+        </script>
 
-            body {
-            margin: 0;
-            display: flex;
 
-            /* This centers our sketch horizontally. */
-            justify-content: center;
-
-            /* This centers our sketch vertically. */
-            align-items: center;
-            }
-        </style> -->
     </head>
     <body>
-       <div>Minimum Spanning Tree (Kruskal Algorithm)</div>
+        <div>
+            <iframe id="kruskal" src="kruskal.html?num_vertices=100" width="450" height="500" frameBorder="0"></iframe>
+            <iframe id="prim" src="prim.html?num_vertices=100" width="450" height="500" frameBorder="0"></iframe>
+        </div>
+
+        <label>Number of Vertices</label>
+        <input id='txt_vertex_count' value="50" type="number"/>
+        <button onclick='generateVertices()'>Go</button>
+
     </body>
 </html>
