@@ -220,7 +220,12 @@ function create_animation_list(){
 
 }
 
-
+function draw_density(){
+    strokeWeight(1)
+    for(var i=0; i<E.length; i++){
+        line(E[i].v1.x,E[i].v1.y,E[i].v2.x,E[i].v2.y)
+    }
+}
 
 function setup() {
     let params = getURLParams();
@@ -275,25 +280,35 @@ function draw_edges(){
     }
 }
 
-function draw_MST(){
-    for(i=0; i<V.length; i++){
-        v = V[i]
-        if(v.pi !== null){
-            u=v.pi
-            // console.log(`draw_MST:  v=${v.id} v.pi = ${v.pi.id}`)
-            stroke('red')
-            line(u.x,u.y,v.x,v.y)
-        }
-    }
+// function draw_MST(){
+//     for(i=0; i<V.length; i++){
+//         v = V[i]
+//         if(v.pi !== null){
+//             u=v.pi
+//             // console.log(`draw_MST:  v=${v.id} v.pi = ${v.pi.id}`)
+//             stroke('red')
+//             strokeWeight(3)
+//             line(u.x,u.y,v.x,v.y)
+//         }
+//     }
     
 
-}
+// }
 
 function draw() {
     background(220);
+    strokeWeight(1)
+    stroke('gray')
+
+    if(current_frame < found_vertices.length){
+        draw_density()  
+    }
+    
     draw_vertices()
+
     m = min(current_frame,found_vertices.length)
     // finished = m>found_vertices.length
+    strokeWeight(3)
     stroke('red')
     for(i=1; i<m;i++){
         v = found_vertices[i]
@@ -303,7 +318,7 @@ function draw() {
             stroke('black')
         }
         line(v.x,v.y,u.x,u.y)
-        strokeWeight(1)
+        // strokeWeight(1)
 
     }
     current_frame++
