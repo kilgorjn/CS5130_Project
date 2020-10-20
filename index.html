@@ -4,11 +4,11 @@
         <script src="https://cdn.jsdelivr.net/npm/p5@1.1.9/lib/p5.js"></script>
         <script src="./index.js"></script>
         <script>
-            max_vertices = 500
+            max_vertices = 200
             function generateVertices(){
                 num_vertices = parseInt(document.getElementById("txt_vertex_count").value)
                 if(num_vertices>max_vertices){
-                    alert(`That's alot of vertices!  Try something <= max_vertices`)
+                    alert(`That's alot of vertices!  Try something <= ${max_vertices}`)
                     return
                 }
                 v_diameter = 10
